@@ -18,13 +18,14 @@ def call(Map config = [:]) {
             AWS_CREDENTIALS_ID = "${AWS_CREDENTIALS_ID}"
         }
 
-        stages {
-            stage('Checkout Terraform Repo') {
-                steps {
-                    echo "🔹 Checking out repo: ${REPO_URL} (branch: ${BRANCH})"
-                    git branch: BRANCH, url: REPO_URL
-                }
-            }
+stage('Checkout Terraform Repo') {
+    steps {
+        echo "🔹 Checking out repo: ${REPO_URL} (branch: ${BRANCH})"
+        git branch: BRANCH, 
+            url: REPO_URL, 
+            credentialsId: 'jenkins-creds'
+    }
+}
 
             stage('Terraform Init') {
                 steps {
