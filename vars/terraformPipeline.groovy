@@ -7,6 +7,7 @@ def call(Map config = [:]) {
     def S3_BUCKET = config.s3_bucket ?: 'your-s3-bucket'
     def BRANCH = config.branch ?: 'main'
     def REPO_URL = config.repo_url ?: 'https://github.com/your-org/terraform-eks-infra.git'
+    def GIT_CREDENTIALS_ID = config.git_credentials_id ?: 'jenkins-creds'
 
     pipeline {
         agent any
@@ -18,14 +19,16 @@ def call(Map config = [:]) {
             AWS_CREDENTIALS_ID = "${AWS_CREDENTIALS_ID}"
         }
 
-stage('Checkout Terraform Repo') {
-    steps {
-        echo "🔹 Checking out repo: ${REPO_URL} (branch: ${BRANCH})"
-        git branch: BRANCH, 
-            url: REPO_URL, 
-            credentialsId: 'jenkins-creds'
-    }
-}
+        stages {
+
+            stage('Checkout Terraform Repo') {
+                steps {
+                    echo "🔹 Checking out repo: ${REPO_URL} (branch: ${BRANCH})"
+                    git branch: BRANCH,
+                        url: REPO_URL,
+                        credentialsId: GIT_CREDENTIALS_ID
+                }
+            }
 
             stage('Terraform Init') {
                 steps {
@@ -72,6 +75,7 @@ stage('Checkout Terraform Repo') {
                     }
                 }
             }
+
         }
 
         post {
