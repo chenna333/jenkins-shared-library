@@ -32,7 +32,7 @@ def call(Map config = [:]) {
                 steps {
                     echo "🔹 Initializing Terraform in region: ${AWS_REGION}, bucket: ${S3_BUCKET}"
                     sh """
-                        terraform init \
+                        terraform init -reconfigure \
                         -backend-config="bucket=${S3_BUCKET}" \
                         -backend-config="key=eks/terraform.tfstate" \
                         -backend-config="region=${AWS_REGION}"
