@@ -6,6 +6,7 @@ def call(Map config = [:]) {
     def S3_BUCKET = config.s3_bucket ?: 'your-s3-bucket'
     def BRANCH = config.branch ?: 'main'
     def REPO_URL = config.repo_url ?: 'https://github.com/chenna333/intraedge-terraform-eks-infra.git'
+    def NAMESPACES_FILE = config.namespaces_file ?: 'k8s-manifests/namespaces.yaml' // relative path in repo
 
     pipeline {
         agent any
@@ -23,8 +24,8 @@ def call(Map config = [:]) {
                     echo "🔹 Checking out repo: ${REPO_URL} (branch: ${BRANCH})"
                     git branch: BRANCH, 
                         url: REPO_URL, 
-                        credentialsId: 'jenkins-creds' // optional if IAM role works
-                    echo "✅ Git checkout completed successfully"
+                        credentialsId: 'jenkins-creds'
+                    echo "✅ Git checkout completed"
                 }
             }
 
@@ -56,19 +57,27 @@ def call(Map config = [:]) {
                 }
             }
 
-            stage('Verify EKS Cluster') {
+            stage('Configure kubectl') {
                 steps {
-                    echo "🔹 Verifying EKS cluster: ${CLUSTER_NAME} in region: ${AWS_REGION}"
+                    echo "🔹 Updating kubeconfig for cluster ${CLUSTER_NAME}"
                     sh """
                         aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}
                         kubectl get nodes
                     """
                 }
             }
+
+            stage('Create Namespaces') {
+                steps {
+                    echo "🔹 Creating Kubernetes namespaces from ${NAMESPACES_FILE}"
+                    sh "kubectl apply -f ${NAMESPACES_FILE}"
+                    sh "kubectl get ns"
+                }
+            }
         }
 
         post {
-            success { echo '✅ Terraform EKS deployment completed successfully!' }
+            success { echo '✅ Terraform EKS deployment and namespaces creation completed successfully!' }
             failure { echo '❌ Deployment failed. Check logs!' }
         }
     }
