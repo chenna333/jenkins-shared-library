@@ -5,7 +5,7 @@ def call(Map config = [:]) {
     def CLUSTER_NAME = config.cluster_name ?: 'demo-eks-cluster'
     def S3_BUCKET = config.s3_bucket ?: 'your-s3-bucket'
     def BRANCH = config.branch ?: 'main'
-    def REPO_URL = config.repo_url ?: 'https://github.com/chenna333/intraedge-terraform-eks-infra.git'
+    def REPO_URL = config.repo_url ?: 'https://github.com/chenna333/Intraedge_exercise_Infra_provisioning_modules.git'
     def NAMESPACES_FILE = config.namespaces_file ?: 'k8s-manifests/namespaces.yaml' // relative path in repo
 
     pipeline {
